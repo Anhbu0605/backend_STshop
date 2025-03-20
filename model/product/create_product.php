@@ -1,4 +1,5 @@
 <?php
+//http://localhost/backend_STshop/index.php/product/create_product
 include_once __DIR__ . '/../../config/db.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -8,7 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 $data = json_decode(file_get_contents("php://input"), true);
 
 // Kiểm tra các trường bắt buộc dựa trên schema của bảng products
-$required_fields = ['name', 'description', 'type', 'price', 'quantity'];
+$required_fields = ['name', 'description', 'type', 'price', 'quantity', 'size'];
 $missing_fields = [];
 
 foreach ($required_fields as $field) {
@@ -30,7 +31,8 @@ if (!empty($missing_fields)) {
 // Làm sạch và kiểm tra dữ liệu đầu vào
 $name = trim($data['name']);
 $description = trim($data['description']);
-$type = trim($data['type']);
+$type = trim($data['type']); 
+$size = json_encode($data['size']); // Chuyển mảng size thành chuỗi JSON
 $price = floatval($data['price']);
 $quantity = intval($data['quantity']);
 $status = isset($data['status']) ? $data['status'] : true;
@@ -87,16 +89,17 @@ if ($quantity < 0) {
 $product_id = uniqid();
 
 // Chèn sản phẩm mới
-$stmt = $conn->prepare("INSERT INTO products (id, name, description, type, price, quantity, status, `lock`, discount, image_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO products (id, name, description, type, size, price, quantity, status, `lock`, discount, image_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 $status_int = $status ? 1 : 0;
 $lock_int = $lock ? 1 : 0;
 $discount_val = $discount !== null ? $discount : 0;
 
-$stmt->bind_param("sssssdiisss", 
+$stmt->bind_param("ssssssdiisss", 
     $product_id, 
     $name, 
     $description, 
     $type,
+    $size,
     $price, 
     $quantity, 
     $status_int,
@@ -113,11 +116,13 @@ if ($stmt->execute()) {
     $select_stmt->execute();
     $new_product = $select_stmt->get_result()->fetch_assoc();
     
+    // Chuyển đổi chuỗi JSON size thành mảng trước khi trả về
+    $new_product['size'] = json_decode($new_product['size']);
+    
     echo json_encode([
         'ok' => true,
         'success' => true,
         'message' => 'Sản phẩm được tạo thành công.',
-        'data' => $new_product
     ]);
     http_response_code(201);
 } else {
