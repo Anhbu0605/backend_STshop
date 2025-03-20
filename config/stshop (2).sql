@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th3 20, 2025 lúc 03:22 PM
+-- Thời gian đã tạo: Th3 20, 2025 lúc 04:15 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -404,11 +404,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `address_id`, `status`, `reason`, `quantity`, `note`, `discount_code`, `total_price`, `subtotal`, `review`, `created_at`, `updated_at`, `size`, `color`) VALUES
-('67dc1b77', '67db92639f2b2', 81, 'Cancel', NULL, 3, '', '', 60000, 30000, 0, '2025-03-20 13:43:19', '2025-03-20 13:52:54', '', ''),
-('67dc1b90', '67db92639f2b2', 81, 'Cancel', NULL, 1, '', '', 40000, 10000, 0, '2025-03-20 13:43:44', '2025-03-20 13:52:52', '', ''),
-('67dc1d9e', '67db92639f2b2', 81, 'Cancel', NULL, 1, 'sdsdf', '', 40000, 10000, 0, '2025-03-20 13:52:30', '2025-03-20 13:52:49', '', ''),
-('67dc2089', '67db92639f2b2', 81, 'Pending', NULL, 2, 'dsgdfg', '', 2000, 345345345, 1, '2025-03-20 14:04:57', '2025-03-20 14:04:57', '20', 'red'),
-('67dc23e3', '67db92639f2b2', 81, 'Pending', NULL, 2, 'dsgdfg', '', 2000, 345345345, 1, '2025-03-20 14:19:15', '2025-03-20 14:19:15', '', '');
+('67dc3095', '67db92639f2b2', 81, 'Pending', NULL, 1, '', '', 40000, 10000, 1, '2025-03-20 15:13:25', '2025-03-20 15:13:25', '20', 'red');
 
 -- --------------------------------------------------------
 
@@ -473,11 +469,7 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `payment_status`, `payment_date`) VALUES
-(339, '67dc1b77', 'cash', 'Pending', '2025-03-20 13:43:19'),
-(340, '67dc1b90', 'cash', 'Pending', '2025-03-20 13:43:44'),
-(341, '67dc1d9e', 'cash', 'Pending', '2025-03-20 13:52:30'),
-(342, '67dc2089', '234234', 'Pending', '2025-03-20 14:04:57'),
-(343, '67dc23e3', '234234', 'Pending', '2025-03-20 14:19:15');
+(352, '67dc3095', 'cash', 'Pending', '2025-03-20 15:13:25');
 
 -- --------------------------------------------------------
 
@@ -506,7 +498,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `sold`, `price`, `quantity`, `status`, `type`, `lock`, `discount`, `image_url`, `created_at`, `size`) VALUES
-('67dc0bcd39eed', 'qqqqq', 'qqqqqq', 0, 10000, 91, 1, 'red , blue', 0, '10', 'qqqqqqq', '2025-03-20 06:36:29', '20,30,40');
+('67dc0bcd39eed', 'qqqqq', 'qqqqqq', 0, 10000, 72, 1, 'red , blue', 0, '10', 'qqqqqqq', '2025-03-20 06:36:29', '20,30,40');
 
 -- --------------------------------------------------------
 
@@ -519,19 +511,17 @@ CREATE TABLE `product_order` (
   `order_id` varchar(64) NOT NULL,
   `product_id` varchar(255) NOT NULL,
   `quantity` int(11) NOT NULL,
-  `price` decimal(15,0) NOT NULL
+  `price` decimal(15,0) NOT NULL,
+  `size` varchar(255) DEFAULT NULL,
+  `color` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `product_order`
 --
 
-INSERT INTO `product_order` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
-(744, '67dc1b77', '67dc0bcd39eed', 3, 10000),
-(745, '67dc1b90', '67dc0bcd39eed', 1, 10000),
-(746, '67dc1d9e', '67dc0bcd39eed', 1, 10000),
-(747, '67dc2089', '67dc0bcd39eed', 2, 10000),
-(748, '67dc23e3', '67dc0bcd39eed', 2, 10000);
+INSERT INTO `product_order` (`id`, `order_id`, `product_id`, `quantity`, `price`, `size`, `color`) VALUES
+(760, '67dc3095', '67dc0bcd39eed', 1, 10000, '20', 'red');
 
 -- --------------------------------------------------------
 
@@ -833,7 +823,7 @@ ALTER TABLE `body_review`
 -- AUTO_INCREMENT cho bảng `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=637;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=648;
 
 --
 -- AUTO_INCREMENT cho bảng `company_info`
@@ -923,13 +913,13 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=344;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=353;
 
 --
 -- AUTO_INCREMENT cho bảng `product_order`
 --
 ALTER TABLE `product_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=749;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=761;
 
 --
 -- AUTO_INCREMENT cho bảng `promotions`
