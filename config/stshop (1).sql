@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th3 20, 2025 lúc 12:33 PM
+-- Thời gian đã tạo: Th3 20, 2025 lúc 03:22 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -99,7 +99,9 @@ CREATE TABLE `cart` (
   `user_id` varchar(64) DEFAULT NULL,
   `product_id` varchar(255) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `checker` tinyint(1) NOT NULL
+  `checker` tinyint(1) NOT NULL,
+  `size` varchar(255) NOT NULL,
+  `color` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -159,6 +161,13 @@ CREATE TABLE `detail_address` (
   `address` varchar(255) NOT NULL,
   `phone` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `detail_address`
+--
+
+INSERT INTO `detail_address` (`id`, `user_id`, `note`, `address`, `phone`) VALUES
+(81, '67db92639f2b2', 'home', 'Nhà 22 ngõ 33 phố xyz , hn', '0325397255');
 
 -- --------------------------------------------------------
 
@@ -385,8 +394,21 @@ CREATE TABLE `orders` (
   `subtotal` decimal(15,0) NOT NULL,
   `review` tinyint(1) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `size` varchar(255) NOT NULL,
+  `color` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `address_id`, `status`, `reason`, `quantity`, `note`, `discount_code`, `total_price`, `subtotal`, `review`, `created_at`, `updated_at`, `size`, `color`) VALUES
+('67dc1b77', '67db92639f2b2', 81, 'Cancel', NULL, 3, '', '', 60000, 30000, 0, '2025-03-20 13:43:19', '2025-03-20 13:52:54', '', ''),
+('67dc1b90', '67db92639f2b2', 81, 'Cancel', NULL, 1, '', '', 40000, 10000, 0, '2025-03-20 13:43:44', '2025-03-20 13:52:52', '', ''),
+('67dc1d9e', '67db92639f2b2', 81, 'Cancel', NULL, 1, 'sdsdf', '', 40000, 10000, 0, '2025-03-20 13:52:30', '2025-03-20 13:52:49', '', ''),
+('67dc2089', '67db92639f2b2', 81, 'Pending', NULL, 2, 'dsgdfg', '', 2000, 345345345, 1, '2025-03-20 14:04:57', '2025-03-20 14:04:57', '20', 'red'),
+('67dc23e3', '67db92639f2b2', 81, 'Pending', NULL, 2, 'dsgdfg', '', 2000, 345345345, 1, '2025-03-20 14:19:15', '2025-03-20 14:19:15', '', '');
 
 -- --------------------------------------------------------
 
@@ -446,6 +468,17 @@ CREATE TABLE `payments` (
   `payment_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `payments`
+--
+
+INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `payment_status`, `payment_date`) VALUES
+(339, '67dc1b77', 'cash', 'Pending', '2025-03-20 13:43:19'),
+(340, '67dc1b90', 'cash', 'Pending', '2025-03-20 13:43:44'),
+(341, '67dc1d9e', 'cash', 'Pending', '2025-03-20 13:52:30'),
+(342, '67dc2089', '234234', 'Pending', '2025-03-20 14:04:57'),
+(343, '67dc23e3', '234234', 'Pending', '2025-03-20 14:19:15');
+
 -- --------------------------------------------------------
 
 --
@@ -465,7 +498,7 @@ CREATE TABLE `products` (
   `discount` varchar(255) DEFAULT NULL,
   `image_url` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `size` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`size`))
+  `size` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -473,8 +506,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `sold`, `price`, `quantity`, `status`, `type`, `lock`, `discount`, `image_url`, `created_at`, `size`) VALUES
-('67dbac802d1cf', 'qqqqq', 'qqqqqq', 0, 10000, 100, 1, 'red , blue', 0, '10', 'https://ananas.vn/wp-content/uploads/Pro_AV00205_4.jpeg', '2025-03-19 23:49:52', '[20,30,40]'),
-('67dbcaed5750c', 'sdfa', 'sdf', 0, 2333, 23, 1, 'red, blue, greens', 0, '20', 'ádf', '2025-03-20 01:59:41', '[\"10\",\" 20\",\" 30\"]');
+('67dc0bcd39eed', 'qqqqq', 'qqqqqq', 0, 10000, 91, 1, 'red , blue', 0, '10', 'qqqqqqq', '2025-03-20 06:36:29', '20,30,40');
 
 -- --------------------------------------------------------
 
@@ -489,6 +521,17 @@ CREATE TABLE `product_order` (
   `quantity` int(11) NOT NULL,
   `price` decimal(15,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `product_order`
+--
+
+INSERT INTO `product_order` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
+(744, '67dc1b77', '67dc0bcd39eed', 3, 10000),
+(745, '67dc1b90', '67dc0bcd39eed', 1, 10000),
+(746, '67dc1d9e', '67dc0bcd39eed', 1, 10000),
+(747, '67dc2089', '67dc0bcd39eed', 2, 10000),
+(748, '67dc23e3', '67dc0bcd39eed', 2, 10000);
 
 -- --------------------------------------------------------
 
@@ -790,7 +833,7 @@ ALTER TABLE `body_review`
 -- AUTO_INCREMENT cho bảng `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=630;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=637;
 
 --
 -- AUTO_INCREMENT cho bảng `company_info`
@@ -808,7 +851,7 @@ ALTER TABLE `contact_info`
 -- AUTO_INCREMENT cho bảng `detail_address`
 --
 ALTER TABLE `detail_address`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT cho bảng `discounts`
@@ -880,13 +923,13 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=339;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=344;
 
 --
 -- AUTO_INCREMENT cho bảng `product_order`
 --
 ALTER TABLE `product_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=744;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=749;
 
 --
 -- AUTO_INCREMENT cho bảng `promotions`

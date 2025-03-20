@@ -12,10 +12,6 @@ include_once __DIR__ . '/../../utils/helpers.php';
 $product = new Product($conn);
 
 try {
-    // Lấy các tham số phân trang
-    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-    $limit = isset($_GET['limit']) ? max(1, intval($_GET['limit'])) : 40;
-
     // Lấy các tham số tìm kiếm và lọc
     $search = isset($_GET['q']) ? trim($_GET['q']) : '';
 
@@ -28,9 +24,67 @@ try {
         'sort_order' => isset($_GET['sort_order']) && strtoupper($_GET['sort_order']) === 'ASC' ? 'ASC' : 'DESC'
     ];
 
-    // Lấy danh sách sản phẩm với các điều kiện
-    $result = $product->read($page, $limit, $search, $filters);
-    $total_products = $product->getTotalCount($search, $filters);
+    // Xây dựng truy vấn để lấy tất cả sản phẩm
+    $query = "SELECT * FROM products WHERE 1=1";
+    
+    // Thêm điều kiện tìm kiếm nếu có
+    if (!empty($search)) {
+        $query .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
+    }
+    
+    // Thêm bộ lọc type nếu không phải 'all'
+    if (!empty($filters['type']) && $filters['type'] !== 'all') {
+        $query .= " AND type = '{$filters['type']}'";
+    }
+    
+    // Thêm bộ lọc khoảng giá nếu có
+    if ($filters['min_price'] !== null) {
+        $query .= " AND price >= {$filters['min_price']}";
+    }
+    
+    if ($filters['max_price'] !== null) {
+        $query .= " AND price <= {$filters['max_price']}";
+    }
+    
+    // Thêm bộ lọc trạng thái nếu có
+    if ($filters['status'] !== null) {
+        $query .= " AND status = {$filters['status']}";
+    }
+    
+    // Thêm sắp xếp
+    $query .= " ORDER BY {$filters['sort_by']} {$filters['sort_order']}";
+    
+    // Thực thi truy vấn để lấy tất cả sản phẩm
+    $result = $conn->query($query);
+    
+    // Đếm tổng số sản phẩm (cần truy vấn riêng)
+    $count_query = "SELECT COUNT(*) as total FROM products WHERE 1=1";
+    
+    // Thêm các điều kiện tương tự như truy vấn chính
+    if (!empty($search)) {
+        $count_query .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
+    }
+    
+    if (!empty($filters['type']) && $filters['type'] !== 'all') {
+        $count_query .= " AND type = '{$filters['type']}'";
+    }
+    
+    if ($filters['min_price'] !== null) {
+        $count_query .= " AND price >= {$filters['min_price']}";
+    }
+    
+    if ($filters['max_price'] !== null) {
+        $count_query .= " AND price <= {$filters['max_price']}";
+    }
+    
+    if ($filters['status'] !== null) {
+        $count_query .= " AND status = {$filters['status']}";
+    }
+    
+    $count_result = $conn->query($count_query);
+    $count_row = $count_result->fetch_assoc();
+    $total_products = $count_row['total'];
+    
     $products_arr = [];
 
     // Chuẩn bị câu lệnh tính điểm trung bình một lần
@@ -48,9 +102,9 @@ try {
 
         // chuyển đổi các trường số sang kiểu dữ liệu thích hợp
         $row['price'] = (float)$row['price'];
+        $row['size'] = $row['size'];
         $row['sold'] = (int)$row['sold'];
         $row['quantity'] = (int)$row['quantity'];
-        // $row['status'] = (bool)$row['status'];
         $row['lock'] = (bool)$row['lock'];
         $row['discount'] = $row['discount'] !== null ? (float)$row['discount'] : null;
 
@@ -58,8 +112,6 @@ try {
         $row['status'] = $row['quantity'] > 0;
 
         $products_arr[] = $row;
-
-
     }
 
     $avg_rating_stmt->close();
@@ -67,7 +119,7 @@ try {
     $response = [
         'ok' => true,
         'status' => 'success',
-        'message' => 'Lấy sản phẩm thành công',
+        'message' => 'Lấy tất cả sản phẩm thành công',
         'code' => 200,
         'data' => [
             'products' => $products_arr,

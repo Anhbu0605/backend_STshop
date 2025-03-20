@@ -21,12 +21,10 @@ try {
 
     // Validate và lấy thông tin sản phẩm
     $product_details = [];
-    // $subtotal = 0;
-    // $total_quantity = 0;
 
     // Validate và tính toán thông tin sản phẩm
     foreach ($data['products'] as $product) {
-        if (!isset($product['product_id']) || !isset($product['quantity']) || $product['quantity'] <= 0) {
+        if (!isset($product['product_id']) || !isset($product['quantity']) || !isset($product['size']) || !isset($product['color']) || $product['quantity'] <= 0) {
             throw new Exception('Thông tin sản phẩm không hợp lệ!');
         }
 
@@ -48,16 +46,13 @@ try {
             throw new Exception("Sản phẩm {$product_info['name']} không đủ số lượng trong kho!");
         }
 
-        // $item_subtotal = $product_info['price'] * $product['quantity'];
-        // $subtotal += $item_subtotal;
-        // $total_quantity += $product['quantity'];
-
         $product_details[] = [
             'product_id' => $product_info['id'],
             'name' => $product_info['name'],
             'price' => $product_info['price'],
-            'quantity' => $product['quantity']
-            // 'subtotal' => $item_subtotal
+            'quantity' => $product['quantity'],
+            'size' => $product['size'],
+            'color' => $product['color']
         ];
     }
 
@@ -68,7 +63,6 @@ try {
     $total_quantity = array_sum(array_column($product_details, 'quantity'));
 
     $discount_code = $data['discount_code'] ?? null;
-    // $discount_amount = 0;
 
     // Xử lý discount nếu có
     if ($discount_code) {
@@ -109,19 +103,18 @@ try {
         $history_stmt->execute();
     }
 
-    // // Tính total_price sau khi áp dụng giảm giá
-    // $total_price = $subtotal - $discount_amount;
-
-    // Tạo đơn hàng - cập nhật theo cấu trúc bảng mới
+    // Tạo đơn hàng
     $order_sql = "INSERT INTO orders (id, user_id, address_id, quantity, status, reason, note, 
-   discount_code, total_price, subtotal, review, created_at, updated_at) 
-VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW())";
+   discount_code, total_price, subtotal, review, created_at, updated_at, size, color) 
+VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW(), ?, ?)";
     $order_stmt = $conn->prepare($order_sql);
     $note = $data['note'] ?? null;
     $total_price = $data['total_price'];
     $subtotal = $data['subtotal'];
+    $size = $data['products'][0]['size'];
+    $color = $data['products'][0]['color'];
     $order_stmt->bind_param(
-        "ssiissdd",
+        "ssiissddss",
         $order_id,
         $data['user_id'],
         $data['address_id'],
@@ -129,22 +122,26 @@ VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW())";
         $note,
         $discount_code,
         $total_price,
-        $subtotal
+        $subtotal,
+        $size,
+        $color
     );
     $order_stmt->execute();
 
     // Thêm chi tiết đơn hàng
     foreach ($product_details as $item) {
         // Thêm vào product_order
-        $product_order_sql = "INSERT INTO product_order (order_id, product_id, quantity, price) 
-                            VALUES (?, ?, ?, ?)";
+        $product_order_sql = "INSERT INTO product_order (order_id, product_id, quantity, price, size, color) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
         $product_order_stmt = $conn->prepare($product_order_sql);
         $product_order_stmt->bind_param(
-            "ssid",
+            "ssidss",
             $order_id,
             $item['product_id'],
             $item['quantity'],
-            $item['price']
+            $item['price'],
+            $item['size'],
+            $item['color']
         );
         $product_order_stmt->execute();
 
@@ -160,9 +157,9 @@ VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW())";
         $update_product_stmt->execute();
 
         // Xóa sản phẩm khỏi giỏ hàng
-        $delete_cart_sql = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+        $delete_cart_sql = "DELETE FROM cart WHERE user_id = ? AND product_id = ? AND size = ? AND color = ?";
         $delete_cart_stmt = $conn->prepare($delete_cart_sql);
-        $delete_cart_stmt->bind_param("ss", $data['user_id'], $item['product_id']);
+        $delete_cart_stmt->bind_param("ssss", $data['user_id'], $item['product_id'], $item['size'], $item['color']);
         $delete_cart_stmt->execute();
     }
 
@@ -176,7 +173,7 @@ VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW())";
 
     // Lấy thông tin chi tiết đơn hàng để trả về
     $order_detail_sql = "SELECT o.*, u.username, p.name as product_name, po.price, po.quantity as item_quantity,
-                        da.phone, da.address
+                        po.size, po.color, da.phone, da.address
                         FROM orders o
                         LEFT JOIN users u ON o.user_id = u.id
                         LEFT JOIN product_order po ON o.id = po.order_id
@@ -208,7 +205,9 @@ VALUES (?, ?, ?, ?, 'Pending', NULL, ?, ?, ?, ?, 1, NOW(), NOW())";
             'quantity' => $row['item_quantity'],
             'price' => $row['price'],
             'total_price' => $row['total_price'],
-            'subtotal' => $row['subtotal']
+            'subtotal' => $row['subtotal'],
+            'size' => $row['size'],
+            'color' => $row['color']
         ];
     }
 
