@@ -21,10 +21,32 @@ try {
     $result = $product->show($product_id);
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
+        
+        // Chuyển đổi các trường cần thiết
+        $row['price'] = (float)$row['price'];
+        $row['sold'] = (int)$row['sold'];
+        $row['quantity'] = (int)$row['quantity'];
         $row['status'] = $row['quantity'] > 0;
         $row['status'] = (bool)$row['status'];
         $row['lock'] = (bool)$row['lock'];
-
+        $row['discount'] = $row['discount'] !== null ? (float)$row['discount'] : null;
+        
+        // Kiểm tra xem có trường size hay không
+        if (!isset($row['size'])) {
+            // Truy vấn trực tiếp để lấy size từ bảng products
+            $size_query = "SELECT size FROM products WHERE id = ?";
+            $size_stmt = $conn->prepare($size_query);
+            $size_stmt->bind_param("s", $product_id);
+            $size_stmt->execute();
+            $size_result = $size_stmt->get_result();
+            
+            if ($size_result->num_rows > 0) {
+                $size_row = $size_result->fetch_assoc();
+                $row['size'] = $size_row['size'];
+            } else {
+                $row['size'] = "";  // Nếu không tìm thấy, đặt giá trị mặc định
+            }
+        }
         
         // tính average_rating
         $avg_rating_query = "SELECT AVG(rating) AS average_rating FROM reviews WHERE product_id = ?";
@@ -65,7 +87,7 @@ try {
                 'id' => $review['id'],
                 'username' => $review['username'],
                 'avata' => $review['avata'],
-                'rating' => $review['rating'],
+                'rating' => (float)$review['rating'],
                 'comment' => $review['comment'],
                 'image_1' => $review['image_1'] ?? null,
                 'image_2' => $review['image_2'] ?? null,

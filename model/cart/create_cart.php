@@ -10,8 +10,8 @@ try {
     $api_key = $headers['X-Api-Key'] ?? '';
 
     // kiểm tra các trường bắt buộc
-    if (!isset($data['product_id'])) {
-        throw new Exception('Thiếu trường bắt buộc: product_id', 400);
+    if (!isset($data['id'])) {
+        throw new Exception('Thiếu trường bắt buộc: id', 400);
     }
 
     if (empty($api_key)) {
@@ -19,8 +19,10 @@ try {
     }
 
     // validate và làm sạch các trường đầu vào
-    $product_id = trim($data['product_id']);
+    $product_id = trim($data['id']);
     $requested_quantity = isset($data['quantity']) ? intval($data['quantity']) : 1;
+    $size = isset($data['size']) ? trim($data['size']) : null;
+    $color = isset($data['color']) ? trim($data['color']) : null;
     
     // Kiểm tra nếu số lượng yêu cầu vượt quá giới hạn
     if ($requested_quantity >= 20) {
@@ -61,9 +63,9 @@ try {
     }
 
     // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
-    $check_sql = "SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? LIMIT 1";
+    $check_sql = "SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND size = ? AND color = ? LIMIT 1";
     $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param("ss", $user_id, $product_id);
+    $check_stmt->bind_param("ssss", $user_id, $product_id, $size, $color);
     $check_stmt->execute();
     $cart_result = $check_stmt->get_result();
 
@@ -89,12 +91,6 @@ try {
         $update_stmt->bind_param("ii", $new_quantity, $cart_item['id']);
         $update_stmt->execute();
 
-        // Cập nhật số lượng sản phẩm trong kho
-        // $new_stock = $product['quantity'] - $quantity;
-        // $update_stock_sql = "UPDATE products SET quantity = ? WHERE id = ?";
-        // $update_stock_stmt = $conn->prepare($update_stock_sql);
-        // $update_stock_stmt->bind_param("is", $new_stock, $product_id);
-        // $update_stock_stmt->execute();
     } else {
         // Kiểm tra tổng số sản phẩm trong giỏ hàng của user khi thêm mới
         $total_products_sql = "SELECT COUNT(*) as total FROM cart WHERE user_id = ?";
@@ -108,17 +104,11 @@ try {
         }
 
         // thêm sản phẩm vào giỏ hàng
-        $insert_sql = "INSERT INTO cart (user_id, product_id, quantity, checker) VALUES (?, ?, ?, 0)";
+        $insert_sql = "INSERT INTO cart (user_id, product_id, size, color, quantity, checker) VALUES (?, ?, ?, ?, ?, 0)";
         $insert_stmt = $conn->prepare($insert_sql);
-        $insert_stmt->bind_param("ssi", $user_id, $product_id, $quantity);
+        $insert_stmt->bind_param("ssssi", $user_id, $product_id, $size, $color, $quantity);
         $insert_stmt->execute();
 
-        // // Cập nhật số lượng sản phẩm trong kho
-        // $new_stock = $product['quantity'] - $quantity;
-        // $update_stock_sql = "UPDATE products SET quantity = ? WHERE id = ?";
-        // $update_stock_stmt = $conn->prepare($update_stock_sql);
-        // $update_stock_stmt->bind_param("is", $new_stock, $product_id);
-        // $update_stock_stmt->execute();
     }
 
     // chuẩn bị response thành công
@@ -127,12 +117,7 @@ try {
         'status' => 'success',
         'message' => 'Thêm sản phẩm vào giỏ hàng thành công',
         'code' => 201,
-        'data' => [
-            'user_id' => $user_id,  
-            'product_id' => $product_id,
-            'quantity' => $quantity,
-            'quantity_limit_reached' => $quantity_limit_reached
-        ]
+       
     ];
     http_response_code(201);
 

@@ -32,7 +32,7 @@ if (!empty($missing_fields)) {
 $name = trim($data['name']);
 $description = trim($data['description']);
 $type = trim($data['type']); 
-$size = json_encode($data['size']); // Chuyển mảng size thành chuỗi JSON
+$size = trim($data['size']); // Chỉ lấy giá trị size dạng chuỗi
 $price = floatval($data['price']);
 $quantity = intval($data['quantity']);
 $status = isset($data['status']) ? $data['status'] : true;
@@ -115,9 +115,6 @@ if ($stmt->execute()) {
     $select_stmt->bind_param("s", $product_id);
     $select_stmt->execute();
     $new_product = $select_stmt->get_result()->fetch_assoc();
-    
-    // Chuyển đổi chuỗi JSON size thành mảng trước khi trả về
-    $new_product['size'] = json_decode($new_product['size']);
     
     echo json_encode([
         'ok' => true,

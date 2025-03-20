@@ -1,4 +1,8 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once __DIR__ . '/../../config/db.php';
 try {
@@ -24,23 +28,18 @@ try {
     $user = $user_result->fetch_assoc();
     $user_id = $user['id'];
 
-    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-    $limit = isset($_GET['limit']) ? max(1, intval($_GET['limit'])) : 20;
-    $offset = ($page - 1) * $limit;
-
     $sort_by = isset($_GET['sort_by']) ? trim($_GET['sort_by']) : 'id';
     $sort_order = isset($_GET['sort_order']) && strtoupper($_GET['sort_order']) === 'ASC' ? 'ASC' : 'DESC';
 
-    $sql = "SELECT c.id, c.user_id, c.product_id, c.quantity, c.checker,
+    $sql = "SELECT c.id, c.user_id, c.product_id, c.quantity, c.checker, c.size, c.color,
                    p.name as product_name, p.price, p.discount, p.image_url, p.status, p.quantity as product_quantity
             FROM cart c
             LEFT JOIN products p ON c.product_id = p.id
             WHERE c.user_id = ?
-            ORDER BY $sort_by $sort_order 
-            LIMIT ? OFFSET ?";
+            ORDER BY $sort_by $sort_order";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sii", $user_id, $limit, $offset);
+    $stmt->bind_param("s", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -54,6 +53,8 @@ try {
         $row['status'] = (bool)$row['status'];
         $row['product_quantity'] = (int)$row['product_quantity'];
         $row['warning'] = true;
+        $row['size'] = $row['size'];
+        $row['color'] = $row['color'];
 
         // Kiểm tra số lượng sản phẩm
         if ($row['product_quantity'] === 0) {
@@ -67,18 +68,7 @@ try {
         $cart_items[] = $row;
     }
 
-    // Lấy tổng số lượng để phân trang
-    $count_sql = "SELECT COUNT(id) AS total 
-                  FROM cart 
-                  WHERE user_id = ?";
-    $count_stmt = $conn->prepare($count_sql);
-    $count_stmt->bind_param("s", $user_id);
-    $count_stmt->execute();
-    $total_result = $count_stmt->get_result()->fetch_assoc();
-    $total_items = $total_result['total'];
-
     $stmt->close();
-    $count_stmt->close();
     $conn->close();
 
     $response = [
@@ -89,13 +79,6 @@ try {
         'data' => [
             'cart_items' => $cart_items,
             'warnings' => $warnings,
-            'pagination' => [
-                'total' => (int)$total_items,
-                'count' => count($cart_items),
-                'per_page' => $limit,
-                'current_page' => $page,
-                'total_pages' => ceil($total_items / $limit)
-            ],
             'filters' => [
                 'user_id' => $user_id,
                 'sort_by' => $sort_by,
