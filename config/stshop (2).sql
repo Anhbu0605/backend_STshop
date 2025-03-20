@@ -490,7 +490,7 @@ CREATE TABLE `products` (
   `discount` varchar(255) DEFAULT NULL,
   `image_url` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `size` varchar(255) NOT NULL
+  `size` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
