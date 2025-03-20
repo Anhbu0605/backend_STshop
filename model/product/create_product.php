@@ -31,8 +31,8 @@ if (!empty($missing_fields)) {
 // Làm sạch và kiểm tra dữ liệu đầu vào
 $name = trim($data['name']);
 $description = trim($data['description']);
-$type = trim($data['type']); 
-$size = trim($data['size']); // Chỉ lấy giá trị size dạng chuỗi
+$type = trim($data['type']) ? trim($data['type']) : '';
+$size = trim($data['size']) ? trim($data['size']) : ''; // Chỉ lấy giá trị size dạng chuỗi
 $price = floatval($data['price']);
 $quantity = intval($data['quantity']);
 $status = isset($data['status']) ? $data['status'] : true;
