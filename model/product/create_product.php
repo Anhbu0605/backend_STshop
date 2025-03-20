@@ -37,8 +37,8 @@ $price = floatval($data['price']);
 $quantity = intval($data['quantity']);
 $status = isset($data['status']) ? $data['status'] : true;
 $lock = isset($data['lock']) ? $data['lock'] : false;
-$discount = isset($data['discount']) ? trim($data['discount']) : null;
-$image_url = isset($data['image_url']) ? trim($data['image_url']) : null;
+$discount = isset($data['discount']) ? trim($data['discount']) : '0';
+$image_url = isset($data['image_url']) ? trim($data['image_url']) : '';
 $created_at = date('Y-m-d H:i:s');
 
 // Kiểm tra độ dài tên sản phẩm
@@ -92,9 +92,8 @@ $product_id = uniqid();
 $stmt = $conn->prepare("INSERT INTO products (id, name, description, type, size, price, quantity, status, `lock`, discount, image_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 $status_int = $status ? 1 : 0;
 $lock_int = $lock ? 1 : 0;
-$discount_val = $discount !== null ? $discount : 0;
 
-$stmt->bind_param("ssssssdiisss", 
+$stmt->bind_param("sssssdiiisss", 
     $product_id, 
     $name, 
     $description, 
@@ -104,7 +103,7 @@ $stmt->bind_param("ssssssdiisss",
     $quantity, 
     $status_int,
     $lock_int,
-    $discount_val,
+    $discount,
     $image_url, 
     $created_at
 );
