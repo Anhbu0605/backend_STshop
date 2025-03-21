@@ -79,7 +79,7 @@ INSERT INTO `body_review` (`id`, `name`, `description`, `icon`) VALUES
 (2, 'Phục Vụ Nhanh Chóng', 'Đặt hàng dễ dàng, xử lý nhanh chóng giúp bạn nhận được đôi giày yêu thích trong thời gian ngắn nhất.', 'FaClock'),
 (3, 'Giao Hàng Tận Nơi', 'Dịch vụ giao hàng nhanh chóng, tiện lợi đến tận cửa nhà bạn trên toàn quốc.', 'FaTruck'),
 (4, 'Chất Lượng Đảm Bảo', 'Cam kết sản phẩm chính hãng, chất lượng cao với độ bền và thoải mái tối ưu.', 'AiFillLike'),
-(5, 'Đa Dạng Món Ăn', '', ''),
+(5, 'Đa Dạng Sản Phẩm', '', ''),
 (6, 'Sản phẩm đa dạng: Giày sneaker, giày chạy bộ, phù hợp cho cả nam và nữ.', '', 'TiTick'),
 (7, 'Chất lượng đảm bảo: Cam kết hàng chính hãng cao cấp, bền đẹp.', '', 'TiTick'),
 (8, 'Giá cả hợp lý: Thường xuyên có khuyến mãi hấp dẫn.', '', 'TiTick'),
