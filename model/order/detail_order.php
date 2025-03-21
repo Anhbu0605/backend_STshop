@@ -56,7 +56,9 @@ try {
             'product_name' => $product['product_name'],
             'quantity' => $product['quantity'],
             'price' => $product['price'],
-            'subtotal' => $subtotal
+            'subtotal' => $subtotal,
+            'size' => $product['size'],
+            'color' => $product['color']
         ];
     }
 

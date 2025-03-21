@@ -32,7 +32,7 @@ if (!empty($missing_fields)) {
 $name = trim($data['name']);
 $description = trim($data['description']);
 $type = trim($data['type']) ? trim($data['type']) : '';
-$size = trim($data['size']) ? trim($data['size']) : ''; // Chỉ lấy giá trị size dạng chuỗi
+$size = isset($data['size']) && !empty(trim($data['size'])) ? trim($data['size']) : null;
 $price = floatval($data['price']);
 $quantity = intval($data['quantity']);
 $status = isset($data['status']) ? $data['status'] : true;
@@ -80,6 +80,17 @@ if ($quantity < 0) {
         'ok' => false,
         'success' => false,
         'message' => 'Số lượng không thể là số âm.'
+    ]);
+    http_response_code(400);
+    exit;
+}
+
+// Kiểm tra size
+if ($size === null) {
+    echo json_encode([
+        'ok' => false,
+        'success' => false,
+        'message' => 'Size không thể trống.'
     ]);
     http_response_code(400);
     exit;
