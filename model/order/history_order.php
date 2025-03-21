@@ -68,7 +68,9 @@ try {
                 'product_name' => $product['product_name'],
                 'quantity' => $product['quantity'],
                 'price' => $product['price'],
-                'image_url' => $product['image_url']
+                'image_url' => $product['image_url'],
+                'size' => $product['size'],
+                'color' => $product['color']
             ];
         }
 
