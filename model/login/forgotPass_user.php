@@ -48,7 +48,7 @@ if ($result->num_rows > 0) {
             $mail->CharSet    = 'UTF-8';
 
             // Recipients
-            $mail->setFrom('nguyenhuy30496@gmail.com', 'FastFood');
+            $mail->setFrom('nguyenhuy30496@gmail.com', 'STshop');
             $mail->addAddress($email);
 
             // Content
@@ -70,13 +70,13 @@ if ($result->num_rows > 0) {
 
                     <p>Nếu bạn gặp bất kỳ vấn đề nào trong quá trình khôi phục mật khẩu, đừng ngần ngại liên hệ với chúng tôi.</p>
 
-                    <p>Cảm ơn bạn đã sử dụng dịch vụ của FastFood!</p>
+                    <p>Cảm ơn bạn đã sử dụng dịch vụ của STshop!</p>
 
                     <div style='margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;'>
                         <p style='margin: 0;'><b>Trân trọng,</b></p>
-                        <p style='margin: 5px 0;'>Đội ngũ hỗ trợ FastFood</p>
-                        <p style='margin: 0;'><a href='#' style='color: #1976d2; text-decoration: none;'>[Website FastFood]</a></p>
-                        <p style='margin: 5px 0;'>Email: fastfood@gmail.com</p>
+                        <p style='margin: 5px 0;'>Đội ngũ hỗ trợ STshop</p>
+                        <p style='margin: 0;'><a href='#' style='color: #1976d2; text-decoration: none;'>[Website STshop]</a></p>
+                        <p style='margin: 5px 0;'>Email: stshop@gmail.com</p>
                     </div>
                 </div>
             ";
